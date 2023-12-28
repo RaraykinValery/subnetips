@@ -11,6 +11,9 @@
 # - разбить сеть на подсети с заданным колвом хостов
 
 import sys
+# from bitarray import bitarray
+import bitarray
+# from bitarray import util
 
 
 class IP:
@@ -18,7 +21,7 @@ class IP:
         self.ip: list = list(map(lambda x: int(x), ip.split(".")))
         self.mask: int = int(mask)
 
-    def subnet(self):
+    def subnet(self) -> None:
         self.print_result(self.__get_subnet())
 
     def __get_subnet(self) -> list:
@@ -45,7 +48,7 @@ class IP:
 
         return subnet
 
-    def print_result(self, result: list):
+    def print_result(self, result: list) -> None:
         print(f'{".".join(list(map(lambda x: str(x), result)))}/{self.mask}')
 
 
@@ -128,7 +131,10 @@ if __name__ == "__main__":
 
     ip = IP(*sys.argv[1].split("/"))
     ip.subnet()
-    subnet = Subnet(*"192.168.32.0/20".split("/"))
-    subnet.first_ip()
-    subnet.last_ip()
-    subnet.broadcast_ip()
+    # subnet = Subnet(*"192.168.32.0/20".split("/"))
+    # subnet.first_ip()
+    # subnet.last_ip()
+    # subnet.broadcast_ip()
+
+    print(bitarray.util.int2ba(192))
+    print(util.int2ba(1, length=8))
