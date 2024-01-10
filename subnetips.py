@@ -16,7 +16,7 @@ import ip_conv
 
 
 class IP:
-    def __init__(self, ip: str):
+    def __init__(self, ip: str) -> None:
         self.ip_str: str = ip
         self.intoctets: list[int] = ip_conv.str2intoc(ip)
         self.boctets: list[bitarray] = ip_conv.intoc2boc(self.intoctets)
@@ -24,20 +24,20 @@ class IP:
 
 
 class SubnetCalculator:
-    def __init__(self, ip: IP, mask: str):
+    def __init__(self, ip: IP, mask: str) -> None:
         self.ip: IP = ip
         self.mask: int = int(mask)
 
     @property
-    def subnet_ip(self):
+    def subnet_ip(self) -> str:
         subnet_bits: bitarray = self.ip.bits
         subnet_bits[self.mask:] = 0
-        subnet_ip = ip_conv.bits2strip(subnet_bits)
+        subnet_ip: str = ip_conv.bits2strip(subnet_bits)
 
         return subnet_ip
 
     @property
-    def first_ip(self):
+    def first_ip(self) -> str:
         ip_bits: bitarray = self.ip.bits
         ip_bits[self.mask:] = 0
         ip_bits[-1] = 1
@@ -45,7 +45,7 @@ class SubnetCalculator:
         return ip_conv.bits2strip(ip_bits)
 
     @property
-    def last_ip(self):
+    def last_ip(self) -> str:
         ip_bits: bitarray = self.ip.bits
         ip_bits[self.mask:] = 1
         ip_bits[-1] = 0
@@ -53,14 +53,14 @@ class SubnetCalculator:
         return ip_conv.bits2strip(ip_bits)
 
     @property
-    def broadcast_ip(self):
+    def broadcast_ip(self) -> str:
         ip_bits: bitarray = self.ip.bits
         ip_bits[self.mask:] = 1
 
         return ip_conv.bits2strip(ip_bits)
 
     @property
-    def ips_number(self):
+    def ips_number(self) -> int:
         pass
 
 
