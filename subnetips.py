@@ -5,9 +5,9 @@
 # - первый IP в подсети
 # - последний IP в подсети
 # - broadcast IP для подсети
-# Дополнительно интересно было бы определить:
 # - сколько всего IP адресов в подсети
-# - входит ли данный IP в данную подсеть
+#
+# Дополнительно интересно было бы определить:
 # - разбить сеть на подсети с заданным колвом хостов
 
 import sys
@@ -54,8 +54,8 @@ class SubnetCalculator:
         return self.create_ip(self.apply_broadcast_ip_mask)
 
     @property
-    def ips_number(self) -> int:
-        pass
+    def hosts_count(self) -> int:
+        return (2 ** (len(self.ip.bits) - self.mask)) - 2
 
     def create_ip(self, apply_mask: Callable[[bitarray], bitarray]) -> IP:
         ip_bits: bitarray = apply_mask(self.ip.bits)
@@ -87,8 +87,6 @@ class SubnetCalculator:
 
 
 if __name__ == "__main__":
-    print(sys.argv[1])
-
     ip_str: str
     mask_str: str
 
@@ -97,13 +95,16 @@ if __name__ == "__main__":
     ip: IP = IP(ip_str, mask_str)
 
     subnet_calculator = SubnetCalculator(ip, mask_str)
-    print(subnet_calculator.subnet_ip)
-    print(subnet_calculator.first_ip)
-    print(subnet_calculator.last_ip)
-    print(subnet_calculator.broadcast_ip)
+    print(f"Subnet IP: {subnet_calculator.subnet_ip}")
+    print(f"First IP: {subnet_calculator.first_ip}")
+    print(f"Last IP: {subnet_calculator.last_ip}")
+    print(f"Broadcast IP: {subnet_calculator.broadcast_ip}")
+    print(f"Hosts in subnet: {subnet_calculator.hosts_count}")
 
     subnet_calculator.mask = 11
-    print(subnet_calculator.subnet_ip)
-    print(subnet_calculator.first_ip)
-    print(subnet_calculator.last_ip)
-    print(subnet_calculator.broadcast_ip)
+    print("\nРезультаты с другой маской подсети:")
+    print(f"Subnet IP: {subnet_calculator.subnet_ip}")
+    print(f"First IP: {subnet_calculator.first_ip}")
+    print(f"Last IP: {subnet_calculator.last_ip}")
+    print(f"Broadcast IP: {subnet_calculator.broadcast_ip}")
+    print(f"Hosts in subnet: {subnet_calculator.hosts_count}")
