@@ -13,6 +13,7 @@
 import sys
 from bitarray import bitarray
 import ip_conv
+from typing import Callable
 
 
 class IP:
@@ -36,50 +37,53 @@ class SubnetCalculator:
         self.ip: IP = ip
         self.mask: int = int(mask)
 
-    def create_ip(self):
-        ip_bits: bitarray = self.ip.bits
-        ip_bits[self.mask:] = 0
-        created_ip: IP = IP(ip_conv.bits2strip(ip_bits), str(self.mask))
-
-        return created_ip
-
     @property
     def subnet_ip(self) -> IP:
-        ip_bits: bitarray = self.ip.bits
-        ip_bits[self.mask:] = 0
-        subnet_ip: IP = IP(ip_conv.bits2strip(ip_bits), str(self.mask))
-
-        return subnet_ip
+        return self.create_ip(self.apply_subnet_ip_mask)
 
     @property
     def first_ip(self) -> list[int]:
-        ip_bits: bitarray = self.ip.bits
-        ip_bits[self.mask:] = 0
-        ip_bits[-1] = 1
-        first_ip: IP = IP(ip_conv.bits2strip(ip_bits), str(self.mask))
-
-        return first_ip
+        return self.create_ip(self.apply_first_ip_mask)
 
     @property
     def last_ip(self) -> list[int]:
-        ip_bits: bitarray = self.ip.bits
-        ip_bits[self.mask:] = 1
-        ip_bits[-1] = 0
-        last_ip: IP = IP(ip_conv.bits2strip(ip_bits), str(self.mask))
-
-        return last_ip
+        return self.create_ip(self.apply_last_ip_mask)
 
     @property
     def broadcast_ip(self) -> list[int]:
-        ip_bits: bitarray = self.ip.bits
-        ip_bits[self.mask:] = 1
-        broadcast_ip: IP = IP(ip_conv.bits2strip(ip_bits), str(self.mask))
-
-        return broadcast_ip
+        return self.create_ip(self.apply_broadcast_ip_mask)
 
     @property
     def ips_number(self) -> int:
         pass
+
+    def create_ip(self, apply_mask: Callable[[bitarray], bitarray]) -> IP:
+        ip_bits: bitarray = apply_mask(self.ip.bits)
+        created_ip: IP = IP(ip_conv.bits2strip(ip_bits), str(self.mask))
+
+        return created_ip
+
+    def apply_first_ip_mask(self, ip_bits: bitarray):
+        ip_bits[self.mask:] = 0
+        ip_bits[-1] = 1
+
+        return ip_bits
+
+    def apply_last_ip_mask(self, ip_bits: bitarray):
+        ip_bits[self.mask:] = 1
+        ip_bits[-1] = 0
+
+        return ip_bits
+
+    def apply_broadcast_ip_mask(self, ip_bits: bitarray):
+        ip_bits[self.mask:] = 1
+
+        return ip_bits
+
+    def apply_subnet_ip_mask(self, ip_bits: bitarray):
+        ip_bits[self.mask:] = 0
+
+        return ip_bits
 
 
 if __name__ == "__main__":
