@@ -11,130 +11,74 @@
 # - разбить сеть на подсети с заданным колвом хостов
 
 import sys
-# from bitarray import bitarray
-import bitarray
-# from bitarray import util
+from bitarray import bitarray
+import ip_conv
 
 
 class IP:
-    def __init__(self, ip: str, mask: str):
-        self.ip: list = list(map(lambda x: int(x), ip.split(".")))
+    def __init__(self, ip: str):
+        self.ip_str: str = ip
+        self.intoctets: list[int] = ip_conv.str2intoc(ip)
+        self.boctets: list[bitarray] = ip_conv.intoc2boc(self.intoctets)
+        self.bits: bitarray = ip_conv.boc2bits(self.boctets)
+
+
+class SubnetCalculator:
+    def __init__(self, ip: IP, mask: str):
+        self.ip: IP = ip
         self.mask: int = int(mask)
 
-    def subnet(self) -> None:
-        self.print_result(self.__get_subnet())
+    @property
+    def subnet_ip(self):
+        subnet_bits: bitarray = self.ip.bits
+        subnet_bits[self.mask:] = 0
+        subnet_ip = ip_conv.bits2strip(subnet_bits)
 
-    def __get_subnet(self) -> list:
-        immutable_octets_number: int = self.mask // 8
-        immutable_bits_number: int = self.mask % 8
-        partially_modifiable_octet_index: int = immutable_octets_number
+        return subnet_ip
 
-        subnet: list = []
-
-        for i in range(immutable_octets_number):
-            subnet.append(self.ip[i])
-
-        bit_mask: str = ('1' * immutable_bits_number
-                         + '0' * (8 - immutable_bits_number))
-        bit_mask_decimal: int = int(bit_mask, 2)
-
-        subnet.append(
-            self.ip[partially_modifiable_octet_index]
-            & bit_mask_decimal
-        )
-
-        for i in range(4 - (partially_modifiable_octet_index + 1)):
-            subnet.append(0)
-
-        return subnet
-
-    def print_result(self, result: list) -> None:
-        print(f'{".".join(list(map(lambda x: str(x), result)))}/{self.mask}')
-
-
-class Subnet:
-    def __init__(self, ip: str, mask: str):
-        self.subnet: list = list(map(lambda x: int(x), ip.split(".")))
-        self.mask: int = int(mask)
-
+    @property
     def first_ip(self):
-        self.print_result(self.__get_first_ip())
+        ip_bits: bitarray = self.ip.bits
+        ip_bits[self.mask:] = 0
+        ip_bits[-1] = 1
 
+        return ip_conv.bits2strip(ip_bits)
+
+    @property
     def last_ip(self):
-        self.print_result(self.__get_last_ip())
+        ip_bits: bitarray = self.ip.bits
+        ip_bits[self.mask:] = 1
+        ip_bits[-1] = 0
 
+        return ip_conv.bits2strip(ip_bits)
+
+    @property
     def broadcast_ip(self):
-        self.print_result(self.__get_broadcast_ip())
+        ip_bits: bitarray = self.ip.bits
+        ip_bits[self.mask:] = 1
 
-    def __get_first_ip(self):
-        first_ip: list = self.subnet
-        first_ip[-1] = first_ip[-1] | 1
+        return ip_conv.bits2strip(ip_bits)
 
-        return first_ip
-
-    def __get_last_ip(self):
-        immutable_octets_number: int = self.mask // 8
-        immutable_bits_number: int = self.mask % 8
-        partially_modifiable_octet_index: int = immutable_octets_number
-
-        last_ip: list = []
-
-        for i in range(immutable_octets_number):
-            last_ip.append(self.subnet[i])
-
-        bit_mask: str = ('0' * immutable_bits_number
-                         + '1' * (8 - immutable_bits_number))
-        bit_mask_decimal: int = int(bit_mask, 2)
-
-        last_ip.append(
-            self.subnet[partially_modifiable_octet_index]
-            | bit_mask_decimal
-        )
-
-        for i in range(4 - (partially_modifiable_octet_index + 1)):
-            last_ip.append(255)
-
-        last_ip[-1] = last_ip[-1] ^ 1
-
-        return last_ip
-
-    def __get_broadcast_ip(self):
-        immutable_octets_number: int = self.mask // 8
-        immutable_bits_number: int = self.mask % 8
-        partially_modifiable_octet_index: int = immutable_octets_number
-
-        broadcast_ip: list = []
-
-        for i in range(immutable_octets_number):
-            broadcast_ip.append(self.subnet[i])
-
-        bit_mask: str = ('0' * immutable_bits_number
-                         + '1' * (8 - immutable_bits_number))
-        bit_mask_decimal: int = int(bit_mask, 2)
-
-        broadcast_ip.append(
-            self.subnet[partially_modifiable_octet_index]
-            | bit_mask_decimal
-        )
-
-        for i in range(4 - (partially_modifiable_octet_index + 1)):
-            broadcast_ip.append(255)
-
-        return broadcast_ip
-
-    def print_result(self, result: list):
-        print(f'{".".join(list(map(lambda x: str(x), result)))}/{self.mask}')
+    @property
+    def ips_number(self):
+        pass
 
 
 if __name__ == "__main__":
     print(sys.argv[1])
 
-    ip = IP(*sys.argv[1].split("/"))
-    ip.subnet()
-    # subnet = Subnet(*"192.168.32.0/20".split("/"))
-    # subnet.first_ip()
-    # subnet.last_ip()
-    # subnet.broadcast_ip()
+    ip_str, mask_str = sys.argv[1].split("/")
 
-    print(bitarray.util.int2ba(192))
-    print(util.int2ba(1, length=8))
+    ip: IP = IP(ip_str)
+
+    subnet_calculator = SubnetCalculator(ip, mask_str)
+    print(subnet_calculator.subnet_ip)
+    print(subnet_calculator.first_ip)
+    print(subnet_calculator.last_ip)
+    print(subnet_calculator.broadcast_ip)
+
+    subnet_calculator.mask = 11
+    print(subnet_calculator.subnet_ip)
+    print(subnet_calculator.first_ip)
+    print(subnet_calculator.last_ip)
+    print(subnet_calculator.broadcast_ip)
