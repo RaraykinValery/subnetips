@@ -9,6 +9,8 @@
 #
 # Дополнительно интересно было бы определить:
 # - разбить сеть на подсети с заданным колвом хостов
+# - разбить сеть на определённое количество подсетей
+#   с максимальным колвом хостов
 
 import sys
 from bitarray import bitarray
@@ -24,7 +26,7 @@ class IP:
         self.boctets: list[bitarray] = ip_conv.intoc2boc(self.intoctets)
         self.bits: bitarray = ip_conv.boc2bits(self.boctets)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         repr: str = self.ip_str
         if self.mask:
             repr += "/" + self.mask
@@ -32,7 +34,7 @@ class IP:
         return repr
 
 
-class SubnetCalculator:
+class Subnet:
     def __init__(self, ip: IP, mask: str) -> None:
         self.ip: IP = ip
         self.mask: int = int(mask)
@@ -42,15 +44,15 @@ class SubnetCalculator:
         return self.create_ip(self.apply_subnet_ip_mask)
 
     @property
-    def first_ip(self) -> list[int]:
+    def first_ip(self) -> IP:
         return self.create_ip(self.apply_first_ip_mask)
 
     @property
-    def last_ip(self) -> list[int]:
+    def last_ip(self) -> IP:
         return self.create_ip(self.apply_last_ip_mask)
 
     @property
-    def broadcast_ip(self) -> list[int]:
+    def broadcast_ip(self) -> IP:
         return self.create_ip(self.apply_broadcast_ip_mask)
 
     @property
@@ -94,17 +96,17 @@ if __name__ == "__main__":
 
     ip: IP = IP(ip_str, mask_str)
 
-    subnet_calculator = SubnetCalculator(ip, mask_str)
-    print(f"Subnet IP: {subnet_calculator.subnet_ip}")
-    print(f"First IP: {subnet_calculator.first_ip}")
-    print(f"Last IP: {subnet_calculator.last_ip}")
-    print(f"Broadcast IP: {subnet_calculator.broadcast_ip}")
-    print(f"Hosts in subnet: {subnet_calculator.hosts_count}")
+    subnet = Subnet(ip, mask_str)
+    print(f"Subnet IP: {subnet.subnet_ip}")
+    print(f"First IP: {subnet.first_ip}")
+    print(f"Last IP: {subnet.last_ip}")
+    print(f"Broadcast IP: {subnet.broadcast_ip}")
+    print(f"Hosts in subnet: {subnet.hosts_count}")
 
-    subnet_calculator.mask = 11
+    subnet.mask = 11
     print("\nРезультаты с другой маской подсети:")
-    print(f"Subnet IP: {subnet_calculator.subnet_ip}")
-    print(f"First IP: {subnet_calculator.first_ip}")
-    print(f"Last IP: {subnet_calculator.last_ip}")
-    print(f"Broadcast IP: {subnet_calculator.broadcast_ip}")
-    print(f"Hosts in subnet: {subnet_calculator.hosts_count}")
+    print(f"Subnet IP: {subnet.subnet_ip}")
+    print(f"First IP: {subnet.first_ip}")
+    print(f"Last IP: {subnet.last_ip}")
+    print(f"Broadcast IP: {subnet.broadcast_ip}")
+    print(f"Hosts in subnet: {subnet.hosts_count}")
